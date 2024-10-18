@@ -12,11 +12,11 @@ import (
 func main() {
 	context, _ := zmq.NewContext()
 
-	frontend, _ := context.NewSocket(zmq.ROUTER)
-	backend, _ := context.NewSocket(zmq.DEALER)
+	frontend, _ := context.NewSocket(zmq.XSUB)
+	backend, _ := context.NewSocket(zmq.XPUB)
 	defer frontend.Close()
 	defer backend.Close()
-	frontend.Bind("tcp://*:5559")
+	frontend.Connect("tcp://localhost:5559")
 	backend.Bind("tcp://*:5560")
 
 	// Initialize poll set
