@@ -23,12 +23,21 @@ func main() {
 	}
 	defer subscriber.Close()
 	subscriber.Connect("tcp://localhost:5556")
-	subscriber.SetSubscribe("10001")
+	subscriber.SetSubscribe("")
+
+	subscriberpt, err2 := zmq.NewSocket(zmq.SUB)
+	if err2 != nil {
+		log.Fatal(err)
+	}
+	defer subscriberpt.Close()
+	subscriberpt.Connect("tcp://localhost:5559")
+	subscriberpt.SetSubscribe("")
 
 	// Setup poller
 	poller := zmq.NewPoller()
 	poller.Add(receiver, zmq.POLLIN)
 	poller.Add(subscriber, zmq.POLLIN)
+	poller.Add(subscriberpt, zmq.POLLIN)
 
 	// Process messages from both sockets
 	for {
@@ -53,7 +62,16 @@ func main() {
 				if err != nil {
 					log.Println("Error receiving from subscriber:", err)
 				} else {
-					fmt.Println("Received weather update:", msg)
+					fmt.Println("Received USA weather update:", msg)
+				}
+
+			case subscriberpt:
+				// Process weather update
+				msg, err := subscriberpt.Recv(0)
+				if err != nil {
+					log.Println("Error receiving from subscriber:", err)
+				} else {
+					fmt.Println("Received Portugal weather update:", msg)
 				}
 			}
 		}
